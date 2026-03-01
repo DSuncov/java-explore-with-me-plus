@@ -24,8 +24,8 @@ public class EndpointHitDto {
     String ip;
 
     @Pattern(
-            regexp = "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01]):\\d{2}:\\d{2}$",
-            message = "Дата и время должны быть в формате: YYYY-MM-DD HH:MM:SS")
+            regexp = "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])[T ]\\d{2}:\\d{2}:\\d{2}$",
+            message = "Дата и время должны быть в формате: YYYY-MM-DD HH:MM:SS или YYYY-MM-DDTHH:MM:SS")
     @NotBlank(message = "Дата и время, когда был совершен запрос к эндпоинту, не может быть пустым.")
     String timestamp;
 }
