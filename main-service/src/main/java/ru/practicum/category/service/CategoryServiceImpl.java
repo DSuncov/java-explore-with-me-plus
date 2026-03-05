@@ -31,7 +31,7 @@ public class CategoryServiceImpl implements CategoryService {
         }
         Category categoryCreate = categoryMapper.toCategory(categoryRequestDto);
 
-        log.info("сохранение пользователя");
+        log.info("сохранение категории");
         categoryRepository.save(categoryCreate);
 
         return categoryMapper.toCategoryDto(categoryCreate);
@@ -46,8 +46,13 @@ public class CategoryServiceImpl implements CategoryService {
         }
 
         Category categoryUpdate = categoryRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("пользователь с id = " + id + " не найден")
+                .orElseThrow(() -> new NotFoundException("категория с id = " + id + " не найден")
         );
+
+        if (!categoryUpdate.getName().equals(categoryRequestDto.getName()) &&
+        categoryRepository.existsByName(categoryRequestDto.getName())) {
+            throw new ConflictException("категория с именем " + categoryRequestDto.getName() + " уже существует");
+        }
         categoryUpdate.setName(categoryRequestDto.getName());
         categoryRepository.save(categoryUpdate);
 
@@ -58,9 +63,9 @@ public class CategoryServiceImpl implements CategoryService {
     @Transactional
     public void delete(Long id) {
         log.info("удаление пользователь с id = {}", id);
-        Category categoryDelete = categoryRepository.findById(id).orElseThrow(
-                () -> new NotFoundException("пользователь с id = " + id + " не найден")
-        );
+        if (!categoryRepository.existsById(id)) {
+            throw new NotFoundException("пользователь с id = " + id + "не найден");
+        }
 
         categoryRepository.deleteById(id);
         log.info("пользователь с id = {} удален", id);
