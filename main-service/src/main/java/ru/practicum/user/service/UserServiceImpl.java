@@ -26,7 +26,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserDto create(UserRequestDto userRequestDto) {
-        log.info("ЗАПРОС НА СОЗДАНИЕ ПОЛЬЗОВАТЕЛЯ");
+        log.info("СОЗДАНИЕ ПОЛЬЗОВАТЕЛЯ");
         log.info("проверка на существования такого email");
         if (userRepository.existsByEmail(userRequestDto.getEmail())) {
             throw new ConflictException("пользователь с таким Email уже существует");
@@ -43,13 +43,13 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserDto> getAllUsers() {
-        log.info("ЗАПРОС НА ВЫВОД ВСЕХ ПОЛЬЗОВАТЕЛЕЙ");
+        log.info("ВЫВОД ВСЕХ ПОЛЬЗОВАТЕЛЕЙ");
         return userMapper.toUserDtoList(userRepository.findAll());
     }
 
     @Override
     public UserDto getUserById(Long id) {
-        log.info("запрос на вывод пользователя по id = {}", id);
+        log.info("вывод пользователя по id = {}", id);
         User userGetById = userRepository.findById(id).orElseThrow(
                 () -> new NotFoundException("пользователь с id = " + id + " не существует")
         );
@@ -59,8 +59,8 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void deleteUser(Long id) {
-        log.info("запрос на удаление пользователя с id = {}", id);
-        if(userRepository.existsById(id)) {
+        log.info("удаление пользователя с id = {}", id);
+        if(!userRepository.existsById(id)) {
             throw new NotFoundException("пользователя с id = " + id + " не существует");
         }
         userRepository.deleteById(id);
