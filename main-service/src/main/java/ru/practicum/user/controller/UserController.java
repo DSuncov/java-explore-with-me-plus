@@ -1,5 +1,6 @@
 package ru.practicum.user.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -20,7 +21,7 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping
-    public ResponseEntity<UserDto> create(UserRequestDto userRequestDto) {
+    public ResponseEntity<UserDto> create(@Valid @RequestBody UserRequestDto userRequestDto) {
         log.info("запрос на создание пользователя: UserController");
         return ResponseEntity
                 .status(HttpStatus.CREATED)
