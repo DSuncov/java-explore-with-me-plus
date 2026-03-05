@@ -8,4 +8,6 @@ import ru.practicum.user.entity.User;
 public interface UserRepository extends JpaRepository<User, Long> {
 
     boolean existsById(Long id);
+
+    boolean existsByEmail(String email);
 }
