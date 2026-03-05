@@ -29,6 +29,10 @@ public class CategoryServiceImpl implements CategoryService {
         if (categoryRepository.existsByName(categoryRequestDto.getName())) {
             throw new ConflictException("категория с таким именем уже существует");
         }
+        if (categoryRequestDto.getName() == null ||
+                categoryRequestDto.getName().isEmpty()) {
+            throw new ValidationException("имя категории при создании пустое или равно null");
+        }
         Category categoryCreate = categoryMapper.toCategory(categoryRequestDto);
 
         log.info("сохранение категории");
