@@ -46,7 +46,7 @@ public class CategoryServiceImpl implements CategoryService {
         }
 
         Category categoryUpdate = categoryRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("категория с id = " + id + " не найден")
+                .orElseThrow(() -> new NotFoundException("категория с id = " + id + " не найдена")
         );
 
         if (!categoryUpdate.getName().equals(categoryRequestDto.getName()) &&
@@ -62,12 +62,12 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     @Transactional
     public void delete(Long id) {
-        log.info("удаление пользователь с id = {}", id);
+        log.info("удаление категории с id = {}", id);
         if (!categoryRepository.existsById(id)) {
-            throw new NotFoundException("пользователь с id = " + id + "не найден");
+            throw new NotFoundException("категория с id = " + id + " не найдена");
         }
 
         categoryRepository.deleteById(id);
-        log.info("пользователь с id = {} удален", id);
+        log.info("категория с id = {} удалена", id);
     }
 }
