@@ -70,7 +70,6 @@ public class CategoryServiceImpl implements CategoryService {
         if (!categoryRepository.existsById(id)) {
             throw new NotFoundException("категория с id = " + id + " не найдена");
         }
-
         categoryRepository.deleteById(id);
         log.info("категория с id = {} удалена", id);
     }
