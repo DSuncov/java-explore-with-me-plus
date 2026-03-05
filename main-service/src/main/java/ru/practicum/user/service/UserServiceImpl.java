@@ -60,7 +60,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public void deleteUser(Long id) {
         log.info("удаление пользователя с id = {}", id);
-        if(!userRepository.existsById(id)) {
+        if (!userRepository.existsById(id)) {
             throw new NotFoundException("пользователя с id = " + id + " не существует");
         }
         userRepository.deleteById(id);
