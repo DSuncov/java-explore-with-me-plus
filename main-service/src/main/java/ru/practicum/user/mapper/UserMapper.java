@@ -4,6 +4,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import ru.practicum.user.dto.UserDto;
 import ru.practicum.user.dto.UserRequestDto;
+import ru.practicum.user.dto.UserShortDto;
 import ru.practicum.user.entity.User;
 
 import java.util.List;
@@ -15,6 +16,8 @@ public interface UserMapper {
     User toUser(UserRequestDto userRequestDto);
 
     UserDto toUserDto(User user);
+
+    UserShortDto toUserShortDto(User user);
 
     List<UserDto> toUserDtoList(List<User> users);
 }
