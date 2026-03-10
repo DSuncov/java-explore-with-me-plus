@@ -88,8 +88,8 @@ public class CompilationServiceImpl implements CompilationService {
         }
 
         if (updateCompilationRequest.getTitle() != null) {
-            if(!updateCompilationRequest.getTitle().equals(compilation.getTitle())) {
-                if(compilationRepository.existsByTitle(updateCompilationRequest.getTitle())) {
+            if (!updateCompilationRequest.getTitle().equals(compilation.getTitle())) {
+                if (compilationRepository.existsByTitle(updateCompilationRequest.getTitle())) {
                     log.warn("Попытка изменить название на уже существующее: {}", updateCompilationRequest.getTitle());
                     throw new ConflictException("Подборка с названием '" + updateCompilationRequest.getTitle() + "' уже существует");
                 }

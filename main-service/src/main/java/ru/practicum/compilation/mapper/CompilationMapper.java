@@ -11,5 +11,6 @@ import ru.practicum.event.mapper.EventMapper;
 public interface CompilationMapper {
     @Mapping(target = "events", ignore = true)
     Compilation toEntity(NewCompilationDto dto);
+
     CompilationDto toDto(Compilation compilation);
 }
