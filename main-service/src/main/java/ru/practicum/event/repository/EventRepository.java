@@ -13,4 +13,6 @@ public interface EventRepository extends JpaRepository<Event, Long>, JpaSpecific
 
     @Query("SELECT e FROM Event e WHERE e.id = :eventId AND e.state = 'PUBLISHED'")
     Optional<Event> findPublishedEventById(Long eventId);
+
+    boolean existsByCategoryId(Long categoryId);
 }
