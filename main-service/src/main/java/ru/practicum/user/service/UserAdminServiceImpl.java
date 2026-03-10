@@ -2,6 +2,7 @@ package ru.practicum.user.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.exception.ConflictException;
@@ -18,7 +19,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class UserServiceImpl implements UserService {
+public class UserAdminServiceImpl implements UserAdminService {
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
@@ -42,9 +43,17 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<UserDto> getAllUsers() {
+    public List<UserDto> getAllUsers(List<Long> ids, Pageable pageable) {
         log.info("ВЫВОД ВСЕХ ПОЛЬЗОВАТЕЛЕЙ");
-        return userMapper.toUserDtoList(userRepository.findAll());
+        if (ids != null && !ids.isEmpty()) {
+            return userRepository.findByIdIn(ids, pageable)
+                    .map(userMapper::toUserDto)
+                    .getContent();
+        } else {
+            return userRepository.findAll(pageable)
+                    .map(userMapper::toUserDto)
+                    .getContent();
+        }
     }
 
     @Override
