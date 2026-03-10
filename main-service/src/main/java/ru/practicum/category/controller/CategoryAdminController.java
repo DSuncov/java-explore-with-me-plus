@@ -8,35 +8,35 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.category.dto.CategoryDto;
 import ru.practicum.category.dto.CategoryRequestDto;
-import ru.practicum.category.service.CategoryService;
+import ru.practicum.category.service.CategoryAdminService;
 
 @Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(path = "/admin/categories")
-public class CategoryController {
+public class CategoryAdminController {
 
-    private final CategoryService categoryService;
+    private final CategoryAdminService categoryAdminService;
 
     @PostMapping
     public ResponseEntity<CategoryDto> create(@Valid @RequestBody CategoryRequestDto categoryRequestDto) {
         log.info("запрос на создание категории: CategoryController");
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(categoryService.create(categoryRequestDto));
+                .body(categoryAdminService.create(categoryRequestDto));
     }
 
     @PatchMapping("/{id}")
     public ResponseEntity<CategoryDto> update(@PathVariable Long id,
                                               @Valid @RequestBody CategoryRequestDto categoryRequestDto) {
         log.info("запрос на обновление категории с id = {}", id);
-        return ResponseEntity.ok(categoryService.update(id, categoryRequestDto));
+        return ResponseEntity.ok(categoryAdminService.update(id, categoryRequestDto));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         log.info("запрос на удаление пользователя с id = {}", id);
-        categoryService.delete(id);
+        categoryAdminService.delete(id);
         return ResponseEntity.noContent().build();
     }
 }

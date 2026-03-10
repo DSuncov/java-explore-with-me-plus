@@ -9,6 +9,7 @@ import ru.practicum.category.dto.CategoryRequestDto;
 import ru.practicum.category.entity.Category;
 import ru.practicum.category.mapper.CategoryMapper;
 import ru.practicum.category.repository.CategoryRepository;
+import ru.practicum.event.repository.EventRepository;
 import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.exception.ValidationException;
@@ -17,10 +18,11 @@ import ru.practicum.exception.ValidationException;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class CategoryServiceImpl implements CategoryService {
+public class CategoryAdminServiceImpl implements CategoryAdminService {
 
     private final CategoryRepository categoryRepository;
     private final CategoryMapper categoryMapper;
+    private final EventRepository eventRepository;
 
     @Override
     @Transactional
@@ -69,6 +71,10 @@ public class CategoryServiceImpl implements CategoryService {
         log.info("удаление категории с id = {}", id);
         if (!categoryRepository.existsById(id)) {
             throw new NotFoundException("категория с id = " + id + " не найдена");
+        }
+
+        if (eventRepository.existsByCategoryId(id)) {
+            throw new ConflictException("удаление не возможно пока существуют события с этой категорией");
         }
         categoryRepository.deleteById(id);
         log.info("категория с id = {} удалена", id);
