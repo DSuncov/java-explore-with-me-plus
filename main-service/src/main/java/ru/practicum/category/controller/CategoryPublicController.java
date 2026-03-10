@@ -13,7 +13,7 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping(path = "categories")
+@RequestMapping(path = "/categories")
 public class CategoryPublicController {
 
     private final CategoryPublicService categoryPublicService;
