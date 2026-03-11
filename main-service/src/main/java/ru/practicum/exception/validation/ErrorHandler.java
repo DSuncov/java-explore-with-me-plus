@@ -1,5 +1,6 @@
 package ru.practicum.exception.validation;
 
+import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -106,5 +107,12 @@ public class ErrorHandler {
         log.error("Unexpected throwable: {}", e.getMessage(), e);
         return new ErrorResponse("ERROR[500]: Internal Server Error",
                 "Критическая ошибка сервера");
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleConstraintViolation(ConstraintViolationException e) {
+        log.error("Validation error: {}", e.getMessage());
+        return new ErrorResponse("ERROR[400]: Bad Request", e.getMessage());
     }
 }
