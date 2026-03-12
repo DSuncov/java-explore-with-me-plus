@@ -7,7 +7,6 @@ import ru.practicum.category.entity.Category;
 import ru.practicum.category.mapper.CategoryMapper;
 import ru.practicum.event.dto.*;
 import ru.practicum.event.entity.Event;
-import ru.practicum.event.entity.Location;
 import ru.practicum.event.enums.State;
 import ru.practicum.user.entity.User;
 import ru.practicum.user.mapper.UserMapper;
@@ -24,7 +23,7 @@ public class EventMapper {
     private final UserMapper userMapper;
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-    // Добавить views и confirmedRequests
+    // Добавить confirmedRequests
     public EventFullDto toFullDto(Event event) {
         EventFullDto eventFullDto = EventFullDto.builder()
                 .id(event.getId())
@@ -32,7 +31,7 @@ public class EventMapper {
                 .category(categoryMapper.toCategoryDto(event.getCategory()))
                 .description(event.getDescription())
                 .initiator(userMapper.toUserShortDto(event.getInitiator()))
-                .location(toDto(event.getLocation()))
+                .location(event.getLocation())
                 .paid(event.getPaid())
                 .participantLimit(event.getParticipantLimit())
                 .requestModeration(event.getRequestModeration())
@@ -55,7 +54,7 @@ public class EventMapper {
         return eventFullDto;
     }
 
-    // Добавить views и confirmedRequests
+    // Добавить confirmedRequests
     public EventShortDto toShortDto(Event event) {
         return EventShortDto.builder()
                 .id(event.getId())
@@ -68,12 +67,12 @@ public class EventMapper {
                 .build();
     }
 
-    public Event toEntity(NewEventDto newEventDto, User user, Category category, Location location) {
+    public Event toEntity(NewEventDto newEventDto, User user, Category category) {
         Event event = Event.builder()
                 .annotation(newEventDto.getAnnotation())
                 .category(category)
                 .initiator(user)
-                .location(location)
+                .location(newEventDto.getLocation())
                 .description(newEventDto.getDescription())
                 .createdOn(LocalDateTime.now())
                 .eventDate(LocalDateTime.parse(newEventDto.getEventDate(), formatter))
@@ -100,20 +99,5 @@ public class EventMapper {
         }
 
         return event;
-    }
-
-    public LocationResponseDto toDto(Location location) {
-        LocationResponseDto locationDto = new LocationResponseDto();
-        locationDto.setId(location.getId());
-        locationDto.setLat(location.getLat());
-        locationDto.setLon(location.getLon());
-        return locationDto;
-    }
-
-    public Location toEntity(LocationCreateDto locationCreateDto) {
-        Location location = new Location();
-        location.setLat(locationCreateDto.getLat());
-        location.setLon(locationCreateDto.getLon());
-        return location;
     }
 }

@@ -7,7 +7,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.EndpointHitDto;
@@ -27,8 +26,10 @@ import ru.practicum.event.enums.SortType;
 import ru.practicum.event.enums.State;
 import ru.practicum.event.mapper.EventMapper;
 import ru.practicum.event.repository.EventRepository;
-import ru.practicum.event.repository.EventSpecification;
 import ru.practicum.event.repository.LocationRepository;
+import ru.practicum.event.specification.AdminEventSpecification;
+import ru.practicum.event.specification.EventSpecification;
+import ru.practicum.event.specification.PublicEventSpecification;
 import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.user.entity.User;
@@ -56,29 +57,34 @@ public class EventServiceImpl implements EventService {
     @Transactional(readOnly = true)
     @Override
     public List<EventShortDto> findEventsBy(PublicEventParam param, HttpServletRequest httpServletRequest) {
-        Specification<Event> spec = Specification.where(null);
-        spec.and(EventSpecification.hasText(param.getText()));
-        spec.and(EventSpecification.hasCategories(param.getCategories()));
-        spec.and(EventSpecification.hasRange(param.getRangeStart(), param.getRangeEnd()));
-        spec.and(EventSpecification.isPaid(param.getPaid()));
-        spec.and(EventSpecification.isOnlyAvailable(param.getOnlyAvailable()));
+        // Сохраняем в статистику
+        saveHit(httpServletRequest);
 
+        EventSpecification specification = PublicEventSpecification.builder()
+                .text(param.getText())
+                .categories(param.getCategories())
+                .paid(param.getPaid())
+                .onlyAvailable(param.getOnlyAvailable())
+                .rangeStart(param.getRangeStart())
+                .rangeEnd(param.getRangeEnd())
+                .build();
+
+        // Создаем пагинацию без сортировки
         Pageable pageable = PageRequest.of(param.getFrom(), param.getSize());
 
         if (param.getSort() == null || param.getSort().isBlank()) {
             if (String.valueOf(SortType.EVENT_DATE).equals(param.getSort())) {
                 Sort sort = Sort.by(Sort.Direction.DESC, param.getSort());
                 pageable = PageRequest.of(param.getFrom(), param.getSize(), sort);
-                Page<Event> events = eventRepository.findAll(spec, pageable);
+                Page<Event> events = eventRepository.findAll(specification.toSpecification(), pageable);
                 return events.stream()
                         .map(eventMapper::toShortDto)
                         .toList();
             }
         }
 
-        saveHit(httpServletRequest);
-
-        List<Event> events = eventRepository.findAll(spec, pageable).getContent();
+        // Продолжаем без сортировки по дате
+        List<Event> events = eventRepository.findAll(specification.toSpecification(), pageable).getContent();
 
         Map<Long, Long> viewsForEvents = getViews(events);
 
@@ -100,15 +106,17 @@ public class EventServiceImpl implements EventService {
     @Transactional(readOnly = true)
     @Override
     public List<EventFullDto> findEventsBy(AdminEventParam param) {
-        Specification<Event> spec = Specification.where(null);
-        spec.and(EventSpecification.hasUsers(param.getUsers()));
-        spec.and(EventSpecification.hasStates(param.getStates()));
-        spec.and(EventSpecification.hasCategories(param.getCategories()));
-        spec.and(EventSpecification.hasRange(param.getRangeStart(), param.getRangeEnd()));
+        EventSpecification specification = AdminEventSpecification.builder()
+                .users(param.getUsers())
+                .states(param.getStates())
+                .categories(param.getCategories())
+                .rangeStart(param.getRangeStart())
+                .rangeEnd(param.getRangeEnd())
+                .build();
 
         Pageable pageable = PageRequest.of(param.getFrom(), param.getSize());
 
-        Page<Event> events = eventRepository.findAll(spec, pageable);
+        Page<Event> events = eventRepository.findAll(specification.toSpecification(), pageable);
 
         return events.stream()
                 .map(eventMapper::toFullDto)
@@ -121,9 +129,12 @@ public class EventServiceImpl implements EventService {
         log.info("Получение пользователя по id.");
         Event event = eventRepository.findPublishedEventById(id)
                 .orElseThrow(() -> new NotFoundException(String.format("События с id = %d не существует.", id)));
-        saveHit(httpServletRequest);
         log.info("Информация о событии получена.");
+        // Сохраняем в статистику
+        saveHit(httpServletRequest);
+
         EventFullDto eventFullDto = eventMapper.toFullDto(event);
+
         log.info("Получаем количество просмотров.");
         eventFullDto.setViews(getStats(event));
         log.info("Количество просмотров получено.");
@@ -163,8 +174,10 @@ public class EventServiceImpl implements EventService {
         }
 
         patchFieldValidation(event, patchEventDto);
-        getStats(event);
-        return eventMapper.toFullDto(event);
+
+        EventFullDto eventFullDto = eventMapper.toFullDto(event);
+        eventFullDto.setViews(getStats(event));
+        return eventFullDto;
     }
 
     @Transactional
@@ -196,7 +209,10 @@ public class EventServiceImpl implements EventService {
         }
 
         patchFieldValidation(event, patchEventDto);
-        return eventMapper.toFullDto(event);
+
+        EventFullDto eventFullDto = eventMapper.toFullDto(event);
+        eventFullDto.setViews(getStats(event));
+        return eventFullDto;
     }
 
     @Transactional(readOnly = true)
@@ -224,21 +240,22 @@ public class EventServiceImpl implements EventService {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new NotFoundException(String.format("Событие с id = %d отсутствует.", eventId)));
 
-        return eventMapper.toFullDto(event);
+        EventFullDto eventFullDto = eventMapper.toFullDto(event);
+        eventFullDto.setViews(getStats(event));
+
+        return eventFullDto;
     }
 
     @Transactional
     @Override
     public EventFullDto saveNewEvent(Long userId, NewEventDto newEventDto) {
-        Location location = locationRepository.save(eventMapper.toEntity(newEventDto.getLocation()));
-
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException(String.format("Пользователя с id = %d не существует.", userId)));
 
         Category category = categoryRepository.findById(newEventDto.getCategory())
                 .orElseThrow(() -> new NotFoundException(String.format("Категории с id = %d не существует.", newEventDto.getCategory())));
 
-        Event event = eventMapper.toEntity(newEventDto, user, category, location);
+        Event event = eventMapper.toEntity(newEventDto, user, category);
         Event createdEvent = eventRepository.save(event);
 
         return eventMapper.toFullDto(createdEvent);

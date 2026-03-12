@@ -8,12 +8,14 @@ import ru.practicum.event.enums.State;
 import ru.practicum.user.entity.User;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
-@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @Entity
+@Getter
+@Setter
 @Table(name = "events")
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Event {
@@ -38,8 +40,7 @@ public class Event {
     @JoinColumn(name = "initiator_id", nullable = false)
     User initiator;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "location_id", nullable = false)
+    @Embedded
     Location location;
 
     @Column(name = "event_date", nullable = false)
@@ -67,4 +68,23 @@ public class Event {
 
     @Column(name = "title", nullable = false)
     String title;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Event event = (Event) o;
+        return Objects.equals(annotation, event.annotation)
+                && Objects.equals(createdOn, event.createdOn) && Objects.equals(location, event.location)
+                && Objects.equals(eventDate, event.eventDate) && Objects.equals(description, event.description)
+                && Objects.equals(paid, event.paid) && Objects.equals(participantLimit, event.participantLimit)
+                && Objects.equals(publishedOn, event.publishedOn) && Objects.equals(requestModeration, event.requestModeration)
+                && state == event.state && Objects.equals(title, event.title);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(annotation, createdOn, location, eventDate, description, paid,
+                participantLimit, publishedOn, requestModeration, state, title);
+    }
 }
