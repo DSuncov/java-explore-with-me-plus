@@ -39,6 +39,6 @@ public class RequestMapper {
     public List<ParticipationRequestDto> toDtoList(List<ParticipationRequest> requests) {
         return requests.stream()
                 .map(this::toDto)
-                .collect(Collectors.toList());  
+                .collect(Collectors.toList());
     }
 }
