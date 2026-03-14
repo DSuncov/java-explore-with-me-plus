@@ -57,4 +57,6 @@ public class PrivateEventController {
     // Добавить обработку GET /users/{userId}/events/{eventId}/requests после реализации запросов
 
     // Добавить обработку PATCH /users/{userId}/events/{eventId}/requests после реализации запросов
+
+
 }
