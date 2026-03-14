@@ -13,6 +13,10 @@ import ru.practicum.event.dto.EventShortDto;
 import ru.practicum.event.dto.NewEventDto;
 import ru.practicum.event.dto.PatchEventDto;
 import ru.practicum.event.service.EventService;
+import ru.practicum.request.dto.EventRequestStatusUpdateRequest;
+import ru.practicum.request.dto.EventRequestStatusUpdateResult;
+import ru.practicum.request.dto.ParticipationRequestDto;
+import ru.practicum.request.service.RequestService;
 
 import java.util.List;
 
@@ -23,6 +27,7 @@ import java.util.List;
 public class PrivateEventController {
 
     private final EventService eventService;
+    private final RequestService requestService;
 
     @GetMapping
     public ResponseEntity<List<EventShortDto>> findEventsBy(
@@ -54,9 +59,21 @@ public class PrivateEventController {
         return ResponseEntity.ok(eventService.patchEventByUser(userId, eventId, patchEventDto));
     }
 
-    // Добавить обработку GET /users/{userId}/events/{eventId}/requests после реализации запросов
+    @GetMapping("/{eventId}/requests")
+    public ResponseEntity<List<ParticipationRequestDto>> findRequestsByInitiator(
+            @PathVariable long userId,
+            @PathVariable long eventId) {
+        List<ParticipationRequestDto> request = requestService.getEventParticipants(userId, eventId);
+        return ResponseEntity.ok(request);
+    }
 
-    // Добавить обработку PATCH /users/{userId}/events/{eventId}/requests после реализации запросов
-
+    @PatchMapping("/{eventId}/requests")
+    public ResponseEntity<EventRequestStatusUpdateResult> updateRequestStatus(
+            @PathVariable long userId,
+            @PathVariable long eventId,
+            @Valid @RequestBody EventRequestStatusUpdateRequest request) {
+        EventRequestStatusUpdateResult result = requestService.changeRequestStatus(userId, eventId, request);
+        return ResponseEntity.ok(result);
+    }
 
 }

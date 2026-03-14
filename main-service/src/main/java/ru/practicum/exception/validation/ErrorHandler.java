@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -53,7 +54,7 @@ public class ErrorHandler {
     public ErrorResponse handleMethodArgumentNotValid(MethodArgumentNotValidException e) {
         log.error("Validation error: {}", e.getMessage());
         return new ErrorResponse("ERROR[400]: Validation Failed",
-                e.getBindingResult().getAllErrors().get(0).getDefaultMessage());
+                e.getBindingResult().getAllErrors().getFirst().getDefaultMessage());
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
@@ -106,5 +107,13 @@ public class ErrorHandler {
         log.error("Unexpected throwable: {}", e.getMessage(), e);
         return new ErrorResponse("ERROR[500]: Internal Server Error",
                 "Критическая ошибка сервера");
+    }
+
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleMissingParams(MissingServletRequestParameterException e) {
+        log.error("Missing request parameter: {}", e.getMessage());
+        return new ErrorResponse("ERROR[400]: Bad Request",
+                "Отсутствует обязательный параметр: " + e.getParameterName());
     }
 }

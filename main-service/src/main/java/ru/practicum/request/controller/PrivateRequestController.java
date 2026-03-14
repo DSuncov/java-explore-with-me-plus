@@ -1,6 +1,5 @@
 package ru.practicum.request.controller;
 
-import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,14 +20,14 @@ public class PrivateRequestController {
 
     @GetMapping
     public ResponseEntity<List<ParticipationRequestDto>> getUserRequests(
-            @PathVariable @Min(1) Long userId) {
+            @PathVariable Long userId) {
         return ResponseEntity.ok(requestService.getUserRequests(userId));
     }
 
     @PostMapping
     public ResponseEntity<ParticipationRequestDto> addParticipationRequest(
-            @PathVariable @Min(1) Long userId,
-            @RequestParam @Min(1) Long eventId) {
+            @PathVariable Long userId,
+            @RequestParam Long eventId) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(requestService.addParticipationRequest(userId, eventId));
@@ -36,8 +35,8 @@ public class PrivateRequestController {
 
     @PatchMapping("/{requestId}/cancel")
     public ResponseEntity<ParticipationRequestDto> cancelRequest(
-            @PathVariable @Min(1) Long userId,
-            @PathVariable @Min(1) Long requestId) {
+            @PathVariable Long userId,
+            @PathVariable Long requestId) {
         return ResponseEntity.ok(requestService.cancelRequest(userId, requestId));
     }
 }

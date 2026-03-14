@@ -24,7 +24,7 @@ public class EventFullDto {
     String createdOn;
     LocationResponseDto location;
     Boolean requestModeration;
-    Long confirmedRequests;
+    Integer confirmedRequests;
     String publishedOn;
     Long views;
 }

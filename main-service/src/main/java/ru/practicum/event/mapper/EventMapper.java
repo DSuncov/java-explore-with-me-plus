@@ -35,6 +35,7 @@ public class EventMapper {
                 .location(toDto(event.getLocation()))
                 .paid(event.getPaid())
                 .participantLimit(event.getParticipantLimit())
+                .confirmedRequests(event.getConfirmedRequests())
                 .requestModeration(event.getRequestModeration())
                 .state(String.valueOf(event.getState()))
                 .title(event.getTitle())
@@ -65,6 +66,7 @@ public class EventMapper {
                 .initiator(userMapper.toUserShortDto(event.getInitiator()))
                 .paid(event.getPaid())
                 .title(event.getTitle())
+                .confirmedRequests(event.getConfirmedRequests())
                 .build();
     }
 

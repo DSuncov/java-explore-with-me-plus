@@ -2,7 +2,7 @@ package ru.practicum.event.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import ru.practicum.event.annotations.DateTimeStart;
@@ -39,7 +39,7 @@ public class NewEventDto {
 
     Boolean paid;
 
-    @Positive(message = "Количество участников должно быть положительным числом.")
+    @PositiveOrZero(message = "Количество участников должно быть положительным числом.")
     Integer participantLimit;
 
     Boolean requestModeration;
