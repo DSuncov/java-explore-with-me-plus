@@ -23,15 +23,15 @@ public class PublicEventController {
 
     @GetMapping
     public ResponseEntity<List<EventShortDto>> findEventsBy(
-            @RequestParam(value = "text", required = false) String text,
-            @RequestParam(value = "categories", required = false) List<Long> categories,
-            @RequestParam(value = "paid", required = false) Boolean paid,
-            @RequestParam(value = "rangeStart", required = false) String rangeStart,
-            @RequestParam(value = "rangeEnd", required = false) String rangeEnd,
-            @RequestParam(name = "onlyAvailable", required = false) Boolean onlyAvailable,
-            @RequestParam(value = "sort", required = false) String sort,
-            @RequestParam(name = "from", defaultValue = "0") Integer from,
-            @RequestParam(name = "size", defaultValue = "10") Integer size,
+            @RequestParam(required = false) String text,
+            @RequestParam(required = false) List<Long> categories,
+            @RequestParam(required = false) Boolean paid,
+            @RequestParam(required = false) String rangeStart,
+            @RequestParam(required = false) String rangeEnd,
+            @RequestParam(required = false, defaultValue = "false") Boolean onlyAvailable,
+            @RequestParam(required = false) String sort,
+            @RequestParam(required = false, defaultValue = "0") Integer from,
+            @RequestParam(required = false, defaultValue = "10") Integer size,
             HttpServletRequest httpServletRequest
             ) {
         var param = new PublicEventParam(text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort, from, size);

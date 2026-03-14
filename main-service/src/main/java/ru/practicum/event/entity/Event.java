@@ -23,8 +23,7 @@ public class Event {
     @Column(name = "id")
     Long id;
 
-    @Lob
-    @Column(name = "annotation")
+    @Column(name = "annotation", nullable = false, columnDefinition = "VARCHAR(2000)")
     String annotation;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -38,15 +37,13 @@ public class Event {
     @JoinColumn(name = "initiator_id", nullable = false)
     User initiator;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "location_id", nullable = false)
+    @Embedded
     Location location;
 
     @Column(name = "event_date", nullable = false)
     LocalDateTime eventDate;
 
-    @Lob
-    @Column(name = "description", nullable = false)
+    @Column(name = "description", nullable = false, columnDefinition = "VARCHAR(7000)")
     String description;
 
     @Column(name = "paid")

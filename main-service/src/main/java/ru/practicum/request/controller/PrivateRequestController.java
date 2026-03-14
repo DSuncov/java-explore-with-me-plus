@@ -28,7 +28,7 @@ public class PrivateRequestController {
     @PostMapping
     public ResponseEntity<ParticipationRequestDto> addParticipationRequest(
             @PathVariable @Min(1) Long userId,
-            @RequestParam @Min(1) Long eventId) {
+            @RequestParam(required = false) @Min(1) Long eventId) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(requestService.addParticipationRequest(userId, eventId));

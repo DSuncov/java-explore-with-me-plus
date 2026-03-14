@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -18,19 +19,20 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/admin/events")
+@Slf4j
 public class AdminEventController {
 
     private final EventService eventService;
 
     @GetMapping
     public ResponseEntity<List<EventFullDto>> findEventsBy(
-            @RequestParam(value = "users", required = false) List<Long> users,
-            @RequestParam(value = "states", required = false) List<String> states,
-            @RequestParam(value = "categories", required = false) List<Long> categories,
-            @RequestParam(value = "rangeStart", required = false) String rangeStart,
-            @RequestParam(value = "rangeEnd", required = false) String rangeEnd,
-            @RequestParam(name = "from", defaultValue = "0") Integer from,
-            @RequestParam(name = "size", defaultValue = "10") Integer size
+            @RequestParam(required = false) List<Long> users,
+            @RequestParam(required = false) List<String> states,
+            @RequestParam(required = false) List<Long> categories,
+            @RequestParam(required = false) String rangeStart,
+            @RequestParam(required = false) String rangeEnd,
+            @RequestParam(required = false,  defaultValue = "0") Integer from,
+            @RequestParam(required = false, defaultValue = "10") Integer size
     ) {
         var param = new AdminEventParam(users, states, categories, rangeStart, rangeEnd, from, size);
         return ResponseEntity.ok(eventService.findEventsBy(param));
