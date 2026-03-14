@@ -70,14 +70,12 @@ public class EventServiceImpl implements EventService {
                 .rangeEnd(param.getRangeEnd())
                 .build();
 
-        int page = param.getFrom() / param.getSize();
-
-        Pageable pageable = PageRequest.of(page, param.getSize());
+        Pageable pageable = PageRequest.of(param.getFrom(), param.getSize());
 
         if (param.getSort() != null && param.getSort().isBlank()) {
             if (String.valueOf(SortType.EVENT_DATE).equals(param.getSort())) {
                 Sort sort = Sort.by(Sort.Direction.DESC, param.getSort());
-                pageable = PageRequest.of(page, param.getSize(), sort);
+                pageable = PageRequest.of(param.getFrom(), param.getSize(), sort);
                 Page<Event> events = eventRepository.findAll(specification.toSpecification(), pageable);
                 return events.stream()
                         .map(eventMapper::toShortDto)
@@ -89,6 +87,7 @@ public class EventServiceImpl implements EventService {
 
         Map<Long, Long> viewsForEvents = getViews(events);
         Map<Long, Long> requestsForEvents = getRequestsForEvents(events);
+        System.out.println(requestsForEvents.toString());
 
         List<EventShortDto> eventsDto = eventMapper.toListShortDtoWithViewsAndRequests(events, viewsForEvents, requestsForEvents);
 
@@ -112,9 +111,7 @@ public class EventServiceImpl implements EventService {
                 .rangeEnd(param.getRangeEnd())
                 .build();
 
-        int page = param.getFrom() / param.getSize();
-
-        Pageable pageable = PageRequest.of(page, param.getSize());
+        Pageable pageable = PageRequest.of(param.getFrom(), param.getSize());
 
         List<Event> events = eventRepository.findAll(specification.toSpecification(), pageable).getContent();
 

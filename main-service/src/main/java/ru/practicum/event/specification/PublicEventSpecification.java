@@ -6,7 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 import ru.practicum.event.entity.Event;
-import ru.practicum.exception.ValidationException;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -38,93 +37,60 @@ public class PublicEventSpecification implements EventSpecification {
     @Override
     public Specification<Event> toSpecification() {
         Specification<Event> spec = Specification.where(null);
-        spec.and(hasText());
-        spec.and(hasCategories());
-        spec.and(hasRange());
-        spec.and(isPaid());
-        spec.and(isOnlyAvailable());
+
+        if (text != null && !text.isBlank()) {
+            String pattern = "%" + text.toLowerCase() + "%";
+
+            Specification<Event> byAnnotation = ((root, query, criteriaBuilder) ->
+                    criteriaBuilder.like(criteriaBuilder.lower(root.get("annotation")), pattern));
+
+            Specification<Event> byDescription = ((root, query, criteriaBuilder) ->
+                    criteriaBuilder.like(criteriaBuilder.lower(root.get("description")), pattern));
+
+            spec = spec.and(byAnnotation.or(byDescription));
+        }
+
+        if (categories != null && !categories.isEmpty()) {
+            spec = spec.and((root, query, criteriaBuilder) -> root.get("category").get("id").in(categories));
+        }
+
+        if (paid != null) {
+            spec = spec.and((root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("paid"), paid));
+        }
+
+        if (onlyAvailable != null) {
+            if (onlyAvailable) {
+                spec = spec.and((root, query, criteriaBuilder) ->
+                        criteriaBuilder.greaterThan(root.get("participantLimit"), root.get("confirmedRequests")));
+            }
+        }
+
+        if ((rangeStart != null && !rangeStart.isBlank()) && (rangeEnd != null && !rangeEnd.isBlank())) {
+            spec = spec.and((root, query, criteriaBuilder) ->
+                    criteriaBuilder.between(root.get("createdOn"),
+                            LocalDateTime.parse(rangeStart, formatter),
+                            LocalDateTime.parse(rangeEnd, formatter)));
+        }
+
+        if ((rangeStart != null && !rangeStart.isBlank()) && (rangeEnd == null || rangeEnd.isBlank())) {
+            spec = spec.and((root, query, criteriaBuilder) ->
+                    criteriaBuilder.between(root.get("createdOn"),
+                            LocalDateTime.parse(rangeStart, formatter),
+                            LocalDateTime.now()));
+        }
+
+        if ((rangeStart == null || rangeStart.isBlank()) && (rangeEnd != null && !rangeEnd.isBlank())) {
+            spec = spec.and((root, query, criteriaBuilder) ->
+                    criteriaBuilder.between(root.get("createdOn"),
+                            LocalDateTime.now(),
+                            LocalDateTime.parse(rangeEnd, formatter)));
+        }
+
+        if ((rangeStart == null || rangeStart.isBlank()) && (rangeEnd == null || rangeEnd.isBlank())) {
+            spec = spec.and(null);
+        }
+
         return spec;
-    }
-
-    private Specification<Event> hasText() {
-        if (text == null || text.isBlank()) {
-            return null;
-        }
-
-        String pattern = "%" + text.toLowerCase() + "%";
-
-        Specification<Event> byAnnotation = ((root, query, criteriaBuilder) ->
-                criteriaBuilder.like(criteriaBuilder.lower(root.get("annotation")), pattern));
-        Specification<Event> byDescription = ((root, query, criteriaBuilder) ->
-                criteriaBuilder.like(criteriaBuilder.lower(root.get("description")), pattern));
-
-        return byAnnotation.or(byDescription);
-    }
-
-    private Specification<Event> hasCategories() {
-        if (categories == null || categories.isEmpty()) {
-            return null;
-        }
-
-        return ((root, query, criteriaBuilder) -> root.get("category.id").in(categories));
-    }
-
-    private Specification<Event> isPaid() {
-        if (paid == null) {
-            return null;
-        }
-
-        return ((root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("paid"), paid));
-    }
-
-    private Specification<Event> hasRange() {
-        if (rangeStart == null & rangeEnd == null) {
-            return null;
-        }
-
-        if (LocalDateTime.parse(rangeEnd, formatter).isBefore(LocalDateTime.parse(rangeStart, formatter))) {
-            throw new ValidationException("Дата старта не может быть позже даты окончания.");
-        }
-
-        return ((root, query, criteriaBuilder) -> {
-
-            if ((rangeStart != null && !rangeStart.isBlank()) && (rangeEnd != null && !rangeEnd.isBlank())) {
-                return criteriaBuilder.between(root.get("createdOn"),
-                        LocalDateTime.parse(rangeStart, formatter),
-                        LocalDateTime.parse(rangeEnd, formatter));
-            }
-
-            if ((rangeStart != null && !rangeStart.isBlank()) && (rangeEnd == null || rangeEnd.isBlank())) {
-                return criteriaBuilder.between(root.get("createdOn"),
-                        LocalDateTime.parse(rangeStart, formatter),
-                        LocalDateTime.now());
-            }
-
-            if ((rangeStart == null || rangeStart.isBlank()) && (rangeEnd != null && !rangeEnd.isBlank())) {
-                return criteriaBuilder.between(root.get("createdOn"),
-                        LocalDateTime.now(),
-                        LocalDateTime.parse(rangeEnd, formatter));
-            }
-
-            if ((rangeStart == null || rangeStart.isBlank()) && (rangeEnd == null || rangeEnd.isBlank())) {
-                return criteriaBuilder.greaterThan(root.get("createdOn"), LocalDateTime.now());
-            }
-
-            return criteriaBuilder.greaterThan(root.get("createdOn"), LocalDateTime.now());
-        });
-    }
-
-    private Specification<Event> isOnlyAvailable() {
-        if (onlyAvailable == null) {
-            return null;
-        }
-
-        if (onlyAvailable) {
-            return ((root, query, criteriaBuilder) ->
-                    criteriaBuilder.greaterThan(root.get("participantLimit"), root.get("confirmedRequests")));
-        }
-
-        return null;
     }
 
     public static Builder builder() {

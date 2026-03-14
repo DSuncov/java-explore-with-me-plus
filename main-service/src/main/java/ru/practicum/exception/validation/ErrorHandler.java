@@ -42,11 +42,10 @@ public class ErrorHandler {
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
-    @ResponseStatus(HttpStatus.CONFLICT)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleDataIntegrityViolation(DataIntegrityViolationException e) {
-        log.error("Data integrity violation: {}", e.getMessage());
-        return new ErrorResponse("ERROR[409]: Data integrity violation",
-                "Нарушение уникальности данных");
+        log.error("Bad request error: {}", e.getMessage());
+        return new ErrorResponse("ERROR[400]: Data integrity violation", e.getMessage());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

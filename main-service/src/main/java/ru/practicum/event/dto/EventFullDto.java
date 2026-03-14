@@ -12,20 +12,20 @@ import ru.practicum.user.dto.UserShortDto;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class EventFullDto {
-    Long id;
-    String title;
     String annotation;
     CategoryDto category;
-    Boolean paid;
-    String eventDate;
-    UserShortDto initiator;
-    String description;
-    Integer participantLimit;
-    String state;
-    String createdOn;
-    Location location;
-    Boolean requestModeration;
     Long confirmedRequests;
+    String createdOn;
+    String description;
+    String eventDate;
+    Long id;
+    UserShortDto initiator;
+    Location location;
+    Boolean paid;
+    Integer participantLimit;
     String publishedOn;
+    Boolean requestModeration;
+    String state;
+    String title;
     Long views;
 }

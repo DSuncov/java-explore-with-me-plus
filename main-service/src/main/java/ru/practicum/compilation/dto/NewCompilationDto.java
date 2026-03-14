@@ -2,8 +2,7 @@ package ru.practicum.compilation.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
-import ru.practicum.event.annotations.MaxLength;
-import ru.practicum.event.annotations.MinLength;
+import org.hibernate.validator.constraints.Length;
 
 import java.util.List;
 
@@ -14,7 +13,6 @@ public class NewCompilationDto {
     private Boolean pinned;
 
     @NotBlank(message = "Название подборки должно быть указано")
-    @MinLength(value = 1, message = "Минимальная длина названия подборки 1 символ")
-    @MaxLength(value = 50, message = "Максимальная длина названия подборки 50 символов")
+    @Length(min = 1, max = 50, message = "Минимальная длина названия подборки 1 символ, максимальная 50 символов.")
     private String title;
 }

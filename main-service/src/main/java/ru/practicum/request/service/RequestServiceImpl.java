@@ -156,6 +156,10 @@ public class RequestServiceImpl implements RequestService {
         Long confirmedRequests = requestRepository.countConfirmedRequestsByEventId(eventId);
         Integer participantLimit = event.getParticipantLimit();
 
+        if (confirmedRequests >= participantLimit) {
+            throw new ConflictException("Достигнут лимит одобренных заявок");
+        }
+
         List<ParticipationRequest> requests = requestRepository.findAllByIdInAndEventId(request.getRequestIds(), eventId);
 
         for (ParticipationRequest req : requests) {
@@ -172,10 +176,6 @@ public class RequestServiceImpl implements RequestService {
                     .confirmedRequests(new ArrayList<>())
                     .rejectedRequests(new ArrayList<>())
                     .build();
-        }
-
-        if (confirmedRequests >= participantLimit) {
-            throw new ConflictException("Достигнут лимит одобренных заявок");
         }
 
         if (request.getStatus().equals("CONFIRMED")) {

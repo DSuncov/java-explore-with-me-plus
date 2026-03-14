@@ -28,7 +28,7 @@ public interface RequestRepository extends JpaRepository<ParticipationRequest, L
     @Query("SELECT e.id, COUNT(pr) " +
             "FROM Event e " +
             "LEFT JOIN ParticipationRequest pr ON pr.event.id = e.id " +
-            "WHERE e.id IN :events " +
+            "WHERE e.id IN :events AND pr.status = 'CONFIRMED' " +
             "GROUP BY e.id")
     List<Object[]> countConfirmedRequestsForEvents(List<Long> events);
 

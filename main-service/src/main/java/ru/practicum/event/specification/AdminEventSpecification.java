@@ -3,7 +3,6 @@ package ru.practicum.event.specification;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 import ru.practicum.event.entity.Event;
-import ru.practicum.exception.ValidationException;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -30,73 +29,45 @@ public class AdminEventSpecification implements EventSpecification {
     @Override
     public Specification<Event> toSpecification() {
         Specification<Event> spec = Specification.where(null);
-        spec.and(hasUsers());
-        spec.and(hasStates());
-        spec.and(hasCategories());
-        spec.and(hasRange());
+
+        if (users != null && !users.isEmpty()) {
+            spec = spec.and((root, query, criteriaBuilder) -> root.get("initiator").get("id").in(users));
+        }
+
+        if (states != null && !states.isEmpty()) {
+            spec = spec.and((root, query, criteriaBuilder) -> root.get("state").in(states));
+        }
+
+        if (categories != null && !categories.isEmpty()) {
+            spec = spec.and((root, query, criteriaBuilder) -> root.get("category").get("id").in(categories));
+        }
+
+        if ((rangeStart != null && !rangeStart.isBlank()) && (rangeEnd != null && !rangeEnd.isBlank())) {
+            spec = spec.and((root, query, criteriaBuilder) ->
+                    criteriaBuilder.between(root.get("createdOn"),
+                            LocalDateTime.parse(rangeStart, formatter),
+                            LocalDateTime.parse(rangeEnd, formatter)));
+        }
+
+        if ((rangeStart != null && !rangeStart.isBlank()) && (rangeEnd == null || rangeEnd.isBlank())) {
+            spec = spec.and((root, query, criteriaBuilder) ->
+                    criteriaBuilder.between(root.get("createdOn"),
+                            LocalDateTime.parse(rangeStart, formatter),
+                            LocalDateTime.now()));
+        }
+
+        if ((rangeStart == null || rangeStart.isBlank()) && (rangeEnd != null && !rangeEnd.isBlank())) {
+            spec = spec.and((root, query, criteriaBuilder) ->
+                    criteriaBuilder.between(root.get("createdOn"),
+                            LocalDateTime.now(),
+                            LocalDateTime.parse(rangeEnd, formatter)));
+        }
+
+        if ((rangeStart == null || rangeStart.isBlank()) && (rangeEnd == null || rangeEnd.isBlank())) {
+            spec = spec.and(null);
+        }
+
         return spec;
-    }
-
-    public Specification<Event> hasUsers() {
-        if (users == null || users.isEmpty()) {
-            return null;
-        }
-
-        return ((root, query, criteriaBuilder) -> root.get("initiator").get("id").in(users));
-    }
-
-
-    public Specification<Event> hasCategories() {
-        if (categories == null || categories.isEmpty()) {
-            return null;
-        }
-
-        return ((root, query, criteriaBuilder) -> root.get("category.id").in(categories));
-    }
-
-    public Specification<Event> hasStates() {
-        if (states == null || states.isEmpty()) {
-            return null;
-        }
-
-        return ((root, query, criteriaBuilder) -> root.get("state").in(states));
-    }
-
-    public Specification<Event> hasRange() {
-        if (rangeStart == null & rangeEnd == null) {
-            return null;
-        }
-
-        if (LocalDateTime.parse(rangeEnd, formatter).isBefore(LocalDateTime.parse(rangeStart, formatter))) {
-            throw new ValidationException("Дата старта не может быть позже даты окончания.");
-        }
-
-        return ((root, query, criteriaBuilder) -> {
-
-            if ((rangeStart != null && !rangeStart.isBlank()) && (rangeEnd != null && !rangeEnd.isBlank())) {
-                return criteriaBuilder.between(root.get("createdOn"),
-                        LocalDateTime.parse(rangeStart, formatter),
-                        LocalDateTime.parse(rangeEnd, formatter));
-            }
-
-            if ((rangeStart != null && !rangeStart.isBlank()) && (rangeEnd == null || rangeEnd.isBlank())) {
-                return criteriaBuilder.between(root.get("createdOn"),
-                        LocalDateTime.parse(rangeStart, formatter),
-                        LocalDateTime.now());
-            }
-
-            if ((rangeStart == null || rangeStart.isBlank()) && (rangeEnd != null && !rangeEnd.isBlank())) {
-                return criteriaBuilder.between(root.get("createdOn"),
-                        LocalDateTime.now(),
-                        LocalDateTime.parse(rangeEnd, formatter));
-            }
-
-            if ((rangeStart == null || rangeStart.isBlank()) && (rangeEnd == null || rangeEnd.isBlank())) {
-                return criteriaBuilder.greaterThan(root.get("createdOn"), LocalDateTime.now());
-            }
-
-            return criteriaBuilder.greaterThan(root.get("createdOn"), LocalDateTime.now());
-        });
     }
 
     public static Builder builder() {
