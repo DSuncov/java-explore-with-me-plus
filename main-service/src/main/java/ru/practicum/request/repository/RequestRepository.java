@@ -25,6 +25,13 @@ public interface RequestRepository extends JpaRepository<ParticipationRequest, L
             "WHERE pr.event.id = :eventId AND pr.status = 'CONFIRMED'")
     Long countConfirmedRequestsByEventId(@Param("eventId") Long eventId);
 
+    @Query("SELECT e.id, COUNT(pr) " +
+            "FROM Event e " +
+            "LEFT JOIN ParticipationRequest pr ON pr.event.id = e.id " +
+            "WHERE e.id IN :events " +
+            "GROUP BY e.id")
+    List<Object[]> countConfirmedRequestsForEvents(List<Long> events);
+
     List<ParticipationRequest> findAllByIdInAndEventId(List<Long> ids, Long eventId);
 
     @Modifying

@@ -2,12 +2,12 @@ package ru.practicum.event.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.hibernate.validator.constraints.Length;
 import ru.practicum.event.annotations.DateTimeStart;
-import ru.practicum.event.annotations.MaxLength;
-import ru.practicum.event.annotations.MinLength;
+import ru.practicum.event.entity.Location;
 
 @Data
 @AllArgsConstructor
@@ -17,16 +17,14 @@ import ru.practicum.event.annotations.MinLength;
 public class NewEventDto {
 
     @NotBlank(message = "Краткое описание события должно быть указано.")
-    @MinLength(value = 20, message = "Минимальная длина аннотации 20 символов.")
-    @MaxLength(value = 2000, message = "Максимальная длина аннотации 2000 символов.")
+    @Length(min = 20, max = 2000, message = "Минимальная длина аннотации 20 символов, максимальная 2000 символов.")
     String annotation;
 
     @NotNull(message = "id категории, к которой относится событие, должно быть указано.")
     Long category;
 
-    @MinLength(value = 20, message = "Минимальная длина описания 20 символов.")
-    @MaxLength(value = 7000, message = "Максимальная длина описания 7000 символов.")
     @NotBlank(message = "Полное описание события должно быть указано.")
+    @Length(min = 20, max = 7000, message = "Минимальная длина описания 20 символов, максимальная 7000 символов.")
     String description;
 
     @NotNull(message = "Дата и время на которые намечено событие должны быть указаны")
@@ -35,17 +33,16 @@ public class NewEventDto {
     String eventDate;
 
     @NotNull(message = "Широта и долгота места проведения события должны быть указаны.")
-    LocationCreateDto location;
+    Location location;
 
     Boolean paid;
 
-    @Positive(message = "Количество участников должно быть положительным числом.")
+    @PositiveOrZero(message = "Количество участников должно быть неотрицательным числом.")
     Integer participantLimit;
 
     Boolean requestModeration;
 
-    @MinLength(value = 3, message = "Минимальная длина заголовка 3 символа.")
-    @MaxLength(value = 120, message = "Максимальная длина заголовка 120 символов.")
     @NotBlank(message = "Заголовок события должен быть указан.")
+    @Length(min = 3, max = 120, message = "Минимальная длина заголовка 3 символа, максимальная 120 символов.")
     String title;
 }

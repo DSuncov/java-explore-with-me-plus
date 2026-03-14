@@ -9,6 +9,7 @@ import ru.practicum.event.enums.State;
 import ru.practicum.event.repository.EventRepository;
 import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.NotFoundException;
+import ru.practicum.exception.ValidationException;
 import ru.practicum.request.dto.EventRequestStatusUpdateRequest;
 import ru.practicum.request.dto.EventRequestStatusUpdateResult;
 import ru.practicum.request.dto.ParticipationRequestDto;
@@ -49,6 +50,10 @@ public class RequestServiceImpl implements RequestService {
     @Transactional
     public ParticipationRequestDto addParticipationRequest(Long userId, Long eventId) {
         log.info("Добавление запроса от пользователя {} на событие {}", userId, eventId);
+
+        if (eventId == null) {
+            throw new ValidationException("Параметр eventId отсутствует.");
+        }
 
         User requester = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException(String.format("Пользователь с id = %d не найден", userId)));

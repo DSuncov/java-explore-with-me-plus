@@ -5,17 +5,12 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 @Data
-@Entity
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "locations")
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@Embeddable
 public class Location {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    Long id;
-
     @Column(name = "lat", nullable = false)
     Float lat;
 
