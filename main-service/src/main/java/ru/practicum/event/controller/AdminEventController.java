@@ -34,7 +34,7 @@ public class AdminEventController {
             @RequestParam(required = false,  defaultValue = "0") Integer from,
             @RequestParam(required = false, defaultValue = "10") Integer size
     ) {
-        var param = new AdminEventParam(users, states, categories, rangeStart, rangeEnd, from, size);
+        AdminEventParam param = new AdminEventParam(users, states, categories, rangeStart, rangeEnd, from, size);
         return ResponseEntity.ok(eventService.findEventsBy(param));
     }
 

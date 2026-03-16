@@ -34,7 +34,7 @@ public class PublicEventController {
             @RequestParam(required = false, defaultValue = "10") Integer size,
             HttpServletRequest httpServletRequest
             ) {
-        var param = new PublicEventParam(text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort, from, size);
+        PublicEventParam param = new PublicEventParam(text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort, from, size);
         return ResponseEntity.ok(eventService.findEventsBy(param, httpServletRequest));
     }
 

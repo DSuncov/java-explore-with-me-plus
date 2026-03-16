@@ -48,7 +48,8 @@ public class PrivateEventController {
     public ResponseEntity<EventFullDto> saveNewEvent(
             @PathVariable("userId") @Min(1) Long id,
             @Valid @RequestBody @NotNull NewEventDto newEventDto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(eventService.saveNewEvent(id, newEventDto));
+        EventFullDto eventFullDto = eventService.saveNewEvent(id, newEventDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(eventFullDto);
     }
 
     @PatchMapping("/{eventId}")
