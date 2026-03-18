@@ -6,6 +6,8 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PastOrPresent;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import ru.practicum.event.entity.Event;
+import ru.practicum.user.entity.User;
 
 import java.time.LocalDateTime;
 
@@ -24,11 +26,13 @@ public class Comment {
     Long id;
 
     @NotNull
-    @Column(name = "commentator_id")
+    @ManyToOne(targetEntity = User.class, fetch = FetchType.LAZY)
+    @JoinColumn(name = "commentator_id", nullable = false, foreignKey = @ForeignKey(name = "fk_comments_users"))
     Long commentatorId;
 
     @NotNull
-    @Column(name = "event_id")
+    @ManyToOne(targetEntity = Event.class, fetch = FetchType.LAZY)
+    @JoinColumn(name = "event_id", nullable = false, foreignKey = @ForeignKey(name = "fk_comments_events"))
     Long eventId;
 
     @NotNull
