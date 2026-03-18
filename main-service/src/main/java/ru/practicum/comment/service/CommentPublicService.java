@@ -9,5 +9,5 @@ public interface CommentPublicService {
 
     CommentDto update(CommentRequestDto commentRequestDto, Long eventId, Long commentatorId, Long commentId);
 
-    void delete(Long commentId, Long commentatorId);
+    void delete(Long eventId, Long commentId, Long commentatorId);
 }

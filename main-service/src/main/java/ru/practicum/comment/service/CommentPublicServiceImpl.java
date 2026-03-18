@@ -69,16 +69,26 @@ public class CommentPublicServiceImpl implements CommentPublicService {
 
     @Override
     @Transactional
-    public void delete(Long commentId, Long commentatorId) {
+    public void delete(Long eventId, Long commentId, Long commentatorId) {
         if (commentId == null) {
             throw new ValidationException("id комментария не может быть равным null");
         }
+
         if (commentatorId == null) {
             throw new ValidationException("id комментатора не может быть равным null");
         }
+
+        if (eventId == null) {
+            throw new ValidationException("id мероприятия не может быть равным null");
+        }
+        if (!eventRepository.existsById(eventId)) {
+            throw new NotFoundException("мероприятия с id = " + eventId + " не существует");
+        }
+
         Comment comment = commentRepository.findById(commentId).orElseThrow(
                 () -> new NotFoundException("комментария с id = " + commentId + " не существует")
         );
+
         if (!comment.getCommentatorId().equals(commentatorId)) {
             throw new ConflictException("комментарий может удалять только его автор либо администратор сайта");
         }
