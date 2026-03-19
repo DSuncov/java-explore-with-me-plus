@@ -38,8 +38,8 @@ public class CommentServiceImpl implements CommentService {
     @Override
     @Transactional
     public CommentDto create(CommentRequestDto commentRequestDto, Long commentatorId, Long eventId) {
-        log.info("Создание комментария: commentatorId={}, eventId={}, text={}",
-                commentatorId, eventId, commentRequestDto != null ? commentRequestDto.getText() : null);
+        log.info("Создание комментария: commentatorId={}, eventId={}",
+                commentatorId, eventId);
 
         validateCommentCreate(commentRequestDto, commentatorId, eventId);
 
@@ -72,8 +72,8 @@ public class CommentServiceImpl implements CommentService {
                              Long eventId,
                              Long commentatorId,
                              Long commentId) {
-        log.info("Обновление комментария: commentId={}, eventId={}, commentatorId={}, text={}",
-                commentId, eventId, commentatorId, commentRequestDto != null ? commentRequestDto.getText() : null);
+        log.info("Обновление комментария: commentId={}, eventId={}, commentatorId={}",
+                commentId, eventId, commentatorId);
         validateCommentUpdate(commentRequestDto, eventId, commentatorId, commentId);
 
         Comment commentFindById = commentRepository.findById(commentId).orElseThrow(() -> {
