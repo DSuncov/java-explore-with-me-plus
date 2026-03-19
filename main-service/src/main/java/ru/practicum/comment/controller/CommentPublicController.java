@@ -1,39 +1,29 @@
 package ru.practicum.comment.controller;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.*;
-import ru.practicum.comment.dto.CommentDto;
-import ru.practicum.comment.dto.CommentRequestDto;
-import ru.practicum.comment.service.CommentPublicService;
+import org.springframework.data.domain.Page;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import ru.practicum.comment.dto.CommentResponseDto;
+import ru.practicum.comment.service.CommentService;
 
-@Slf4j
+
 @RestController
 @RequiredArgsConstructor
-@RequestMapping(path = "/events/{eventId}/comments/{commentatorId}")
+@RequestMapping(path = "/events/{eventId}/comments")
 public class CommentPublicController {
+    private final CommentService commentService;
 
-    private final CommentPublicService commentPublicService;
-
-    @PostMapping
-    public CommentDto create(@RequestBody CommentRequestDto commentRequestDto,
-                             @PathVariable("eventId") Long eventId,
-                             @PathVariable("commentatorId") Long commentatorId) {
-         return commentPublicService.create(commentRequestDto, commentatorId, eventId);
-    }
-
-    @PatchMapping("/{commentId}")
-    public CommentDto update(@RequestBody CommentRequestDto commentRequestDto,
-                             @PathVariable("eventId") Long eventId,
-                             @PathVariable("commentatorId") Long commentatorId,
-                             @PathVariable("commentId") Long commentId) {
-        return commentPublicService.update(commentRequestDto, eventId, commentatorId, commentId);
-    }
-
-    @DeleteMapping("/{commentId}")
-    public void delete(@PathVariable("eventId") Long eventId,
-                             @PathVariable("commentatorId") Long commentatorId,
-                             @PathVariable("commentId") Long commentId) {
-        commentPublicService.delete(eventId, commentId, commentatorId);
+    @GetMapping
+    ResponseEntity<Page<CommentResponseDto>> getCommentsByEvent(@PathVariable Long eventId,
+                                                                @RequestParam(required = false, defaultValue = "asc") String sort,
+                                                                @RequestParam(defaultValue = "0") int from,
+                                                                @RequestParam(defaultValue = "10") int size) {
+        Page<CommentResponseDto> comments = commentService.getCommentsByEvent(eventId, sort, from, size);
+        return ResponseEntity.ok(comments);
     }
 }
