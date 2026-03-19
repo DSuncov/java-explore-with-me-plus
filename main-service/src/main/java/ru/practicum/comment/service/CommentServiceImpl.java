@@ -41,8 +41,6 @@ public class CommentServiceImpl implements CommentService {
         log.info("Создание комментария: commentatorId={}, eventId={}",
                 commentatorId, eventId);
 
-        validateCommentCreate(commentRequestDto, commentatorId, eventId);
-
         User commentator = userRepository.findById(commentatorId).orElseThrow(() -> {
             log.warn("Пользователь с id={} не найден при создании комментария", commentatorId);
             return new NotFoundException("Пользователь с id = " + commentatorId + " не найден");
@@ -74,7 +72,6 @@ public class CommentServiceImpl implements CommentService {
                              Long commentId) {
         log.info("Обновление комментария: commentId={}, eventId={}, commentatorId={}",
                 commentId, eventId, commentatorId);
-        validateCommentUpdate(commentRequestDto, eventId, commentatorId, commentId);
 
         Comment commentFindById = commentRepository.findById(commentId).orElseThrow(() -> {
             log.warn("Комментарий с id={} не найден для обновления", commentId);
@@ -144,11 +141,6 @@ public class CommentServiceImpl implements CommentService {
     public void deleteByAdmin(Long commentId) {
         log.info("Удаление комментария администратором: commentId={}", commentId);
 
-        if (commentId == null) {
-            log.warn("Попытка удаления с null commentId администратором");
-            throw new ValidationException("id комментария не может быть равным null");
-        }
-
         if (!commentRepository.existsById(commentId)) {
             log.warn("Комментарий с id={} не найден при удалении администратором", commentId);
             throw new NotFoundException("комментария с id = " + commentId + " не существует");
@@ -180,57 +172,5 @@ public class CommentServiceImpl implements CommentService {
         Page<Comment> comments = commentRepository.findAllByEventId(eventId, pageable);
         log.debug("Найдено {} комментариев для события id={}", comments.getNumberOfElements(), eventId);
         return comments.map(commentMapper::toCommentResponseDto);
-    }
-
-
-    private void validateCommentCreate(CommentRequestDto commentRequestDto, Long commentatorId, Long eventId) {
-        if (commentRequestDto == null) {
-            log.warn("Попытка создать комментарий с null телом запроса");
-            throw new ValidationException("тело запроса не может равняться null");
-        }
-
-        if (commentRequestDto.getText() == null || commentRequestDto.getText().isEmpty()) {
-            log.warn("Попытка создать комментарий с пустым текстом: text={}", commentRequestDto.getText());
-            throw new ValidationException("текст комментария не может быть пустым или равняться null");
-        }
-
-        if (commentatorId == null) {
-            log.warn("Попытка создать комментарий с null commentatorId");
-            throw new ValidationException("id комментатора не может быть равным null");
-        }
-
-        if (eventId == null) {
-            log.warn("Попытка создать комментарий с null eventId");
-            throw new ValidationException("id мероприятия не может равняться null");
-        }
-    }
-
-    private void validateCommentUpdate(CommentRequestDto commentRequestDto,
-                                       Long eventId,
-                                       Long commentatorId,
-                                       Long commentId) {
-        if (commentRequestDto == null) {
-            log.warn("Попытка обновить комментарий с null телом запроса");
-            throw new ValidationException("тело запроса не может равняться null");
-        }
-        if (commentRequestDto.getText() == null || commentRequestDto.getText().isEmpty()) {
-            log.warn("Попытка обновить комментарий с пустым текстом");
-            throw new ValidationException("текст комментария не может быть пустым или равняться null");
-        }
-
-        if (eventId == null) {
-            log.warn("Попытка обновить комментарий с null eventId");
-            throw new ValidationException("id мероприятия не может равняться null");
-        }
-
-        if (commentatorId == null) {
-            log.warn("Попытка обновить комментарий с null commentatorId");
-            throw new ValidationException("id комментатора не может равняться null");
-        }
-
-        if (commentId == null) {
-            log.warn("Попытка обновить комментарий с null commentId");
-            throw new ValidationException("id комментария не может равняться null");
-        }
     }
 }
