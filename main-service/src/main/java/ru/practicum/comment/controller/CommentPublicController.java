@@ -20,7 +20,8 @@ public class CommentPublicController {
 
     @GetMapping
     ResponseEntity<Page<CommentResponseDto>> getCommentsByEvent(@PathVariable Long eventId,
-                                                                @RequestParam(required = false, defaultValue = "asc") String sort,
+                                                                @RequestParam(required = false,
+                                                                        defaultValue = "asc") String sort,
                                                                 @RequestParam(defaultValue = "0") int from,
                                                                 @RequestParam(defaultValue = "10") int size) {
         Page<CommentResponseDto> comments = commentService.getCommentsByEvent(eventId, sort, from, size);
