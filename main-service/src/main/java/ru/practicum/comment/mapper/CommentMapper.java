@@ -11,8 +11,6 @@ import ru.practicum.comment.entity.Comment;
 public interface CommentMapper {
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "eventId", ignore = true)
-    @Mapping(target = "commentatorId", ignore = true)
     @Mapping(target = "created", ignore = true)
     Comment toComment(CommentRequestDto commentRequestDto);
 
