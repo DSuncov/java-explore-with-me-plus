@@ -1,7 +1,6 @@
 package ru.practicum.event.mapper;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.practicum.category.entity.Category;
 import ru.practicum.category.mapper.CategoryMapper;
@@ -18,7 +17,6 @@ import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
-@Slf4j
 public class EventMapper {
 
     private final CategoryMapper categoryMapper;

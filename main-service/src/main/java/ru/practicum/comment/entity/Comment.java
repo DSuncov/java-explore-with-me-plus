@@ -41,7 +41,6 @@ public class Comment {
     LocalDateTime created;
 
     @Column(name = "text")
-    @NotNull(message = "текст комментария не может быть null")
     @NotBlank(message = "текст комментария не может быть пустым")
     String text;
 }
