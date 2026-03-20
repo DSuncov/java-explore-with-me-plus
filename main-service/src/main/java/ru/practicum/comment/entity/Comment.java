@@ -26,14 +26,14 @@ public class Comment {
     Long id;
 
     @NotNull
-    @ManyToOne(targetEntity = User.class, fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "commentator_id", nullable = false, foreignKey = @ForeignKey(name = "fk_comments_users"))
-    Long commentatorId;
+    User commentator;
 
     @NotNull
-    @ManyToOne(targetEntity = Event.class, fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "event_id", nullable = false, foreignKey = @ForeignKey(name = "fk_comments_events"))
-    Long eventId;
+    Event event;
 
     @NotNull
     @PastOrPresent

@@ -9,14 +9,15 @@ import ru.practicum.comment.entity.Comment;
 
 @Mapper(componentModel = "spring")
 public interface CommentMapper {
-
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "eventId", ignore = true)
-    @Mapping(target = "commentatorId", ignore = true)
     @Mapping(target = "created", ignore = true)
+    @Mapping(target = "commentator", ignore = true)
     Comment toComment(CommentRequestDto commentRequestDto);
 
+    @Mapping(source = "commentator.id", target = "commentatorId")
     CommentResponseDto toCommentResponseDto(Comment comment);
 
+    @Mapping(source = "commentator.id", target = "commentatorId")
+    @Mapping(source = "event.id", target = "eventId")
     CommentDto toCommentDto(Comment comment);
 }
