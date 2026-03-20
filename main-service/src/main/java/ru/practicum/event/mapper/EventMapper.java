@@ -18,7 +18,6 @@ import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
-@Slf4j
 public class EventMapper {
 
     private final CategoryMapper categoryMapper;
