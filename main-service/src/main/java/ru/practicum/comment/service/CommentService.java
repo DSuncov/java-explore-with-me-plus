@@ -1,9 +1,10 @@
 package ru.practicum.comment.service;
 
 import org.springframework.data.domain.Page;
-import ru.practicum.comment.dto.CommentDto;
-import ru.practicum.comment.dto.CommentRequestDto;
-import ru.practicum.comment.dto.CommentResponseDto;
+import ru.practicum.comment.dto.*;
+import ru.practicum.comment.enums.CommentsSortType;
+
+import java.util.List;
 
 public interface CommentService {
 
@@ -16,4 +17,10 @@ public interface CommentService {
     void deleteByAdmin(Long commentId);
 
     Page<CommentResponseDto> getCommentsByEvent(Long eventId, String  sort, int from, int size);
+
+    ReactionResponseDto addVote(Long evaluatorId, Long commentId, String voteType);
+
+    CommentStatsResponse getReactionStatsByComment(Long commentId);
+
+    List<CommentResponseDto> getCommentsBy(CommentsSortType sort, String direction, Integer from, Integer size);
 }

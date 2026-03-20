@@ -8,21 +8,24 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.comment.dto.CommentDto;
-import ru.practicum.comment.dto.CommentRequestDto;
-import ru.practicum.comment.dto.CommentResponseDto;
+import ru.practicum.comment.dto.*;
 import ru.practicum.comment.entity.Comment;
+import ru.practicum.comment.entity.Reaction;
+import ru.practicum.comment.enums.CommentsSortType;
 import ru.practicum.comment.mapper.CommentMapper;
+import ru.practicum.comment.mapper.ReactionMapper;
 import ru.practicum.comment.repository.CommentRepository;
+import ru.practicum.comment.repository.ReactionRepository;
 import ru.practicum.event.entity.Event;
 import ru.practicum.event.repository.EventRepository;
 import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.NotFoundException;
-import ru.practicum.exception.ValidationException;
 import ru.practicum.user.entity.User;
 import ru.practicum.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -34,6 +37,8 @@ public class CommentServiceImpl implements CommentService {
     private final UserRepository userRepository;
     private final EventRepository eventRepository;
     private final CommentMapper commentMapper;
+    private final ReactionRepository reactionRepository;
+    private final ReactionMapper reactionMapper;
 
     @Override
     @Transactional
@@ -66,10 +71,11 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     @Transactional
-    public CommentDto update(CommentRequestDto commentRequestDto,
-                             Long eventId,
-                             Long commentatorId,
-                             Long commentId) {
+    public CommentDto update(
+            CommentRequestDto commentRequestDto,
+            Long eventId,
+            Long commentatorId,
+            Long commentId) {
         log.info("Обновление комментария: commentId={}, eventId={}, commentatorId={}",
                 commentId, eventId, commentatorId);
 
@@ -96,21 +102,6 @@ public class CommentServiceImpl implements CommentService {
     public void delete(Long eventId, Long commentId, Long userId) {
         log.info("Удаление комментария пользователем: eventId={}, commentId={}, userId={}",
                 eventId, commentId, userId);
-
-        if (commentId == null) {
-            log.warn("Попытка удаления с null commentId");
-            throw new ValidationException("id комментария не может быть равным null");
-        }
-
-        if (userId == null) {
-            log.warn("Попытка удаления с null userId");
-            throw new ValidationException("id пользователя не может быть равным null");
-        }
-
-        if (eventId == null) {
-            log.warn("Попытка удаления с null eventId");
-            throw new ValidationException("id мероприятия не может быть равным null");
-        }
 
         Event event = eventRepository.findById(eventId).orElseThrow(() -> {
             log.warn("Событие с id={} не найдено при удалении комментария", eventId);
@@ -172,5 +163,84 @@ public class CommentServiceImpl implements CommentService {
         Page<Comment> comments = commentRepository.findAllByEventId(eventId, pageable);
         log.debug("Найдено {} комментариев для события id={}", comments.getNumberOfElements(), eventId);
         return comments.map(commentMapper::toCommentResponseDto);
+    }
+
+    @Override
+    public ReactionResponseDto addVote(Long evaluatorId, Long commentId, String voteType) {
+        User evaluator = userRepository.findById(evaluatorId).orElseThrow(() -> {
+            log.warn("Пользователь с id={} не найден при добавлении реакции к комментарию", evaluatorId);
+            return new NotFoundException("Пользователь с id = " + evaluatorId + " не найден");
+        });
+
+        Comment comment = commentRepository.findById(commentId).orElseThrow(() -> {
+            log.warn("Комментарий с id={} не найден при добавлении реакции к комментарию", commentId);
+            return new NotFoundException("комментария с id = " + commentId + " не существует");
+        });
+
+        Optional<Reaction> reactionOpt = reactionRepository.existByUserAndComment(evaluatorId, commentId);
+
+        if (reactionOpt.isPresent()) {
+            // Пользователь уже оставлял реакцию для комментария, поэтому обновляем, если реакция другая
+            Reaction reaction = reactionOpt.get();
+            if (!reaction.getVoteType().equals(voteType)) {
+                reaction.setVoteType(voteType);
+                return reactionMapper.toReactionResponseDto(reactionRepository.save(reaction));
+            }
+        }
+
+        Reaction reactionForSave = Reaction.builder()
+                .voteType(voteType)
+                .evaluator(evaluator)
+                .comment(comment)
+                .build();
+
+        Reaction createdReaction = reactionRepository.save(reactionForSave);
+        return reactionMapper.toReactionResponseDto(createdReaction);
+    }
+
+    @Override
+    public CommentStatsResponse getReactionStatsByComment(Long commentId) {
+        if (!commentRepository.existsById(commentId)) {
+            log.warn("Комментарий с id={} не найден при получении статистики", commentId);
+            throw new NotFoundException("комментария с id = " + commentId + " не существует");
+        }
+
+        List<Object[]> results = reactionRepository.getLikesAndDislikesCount(commentId);
+
+        long likes = 0;
+        long dislikes = 0;
+
+        for (Object[] row : results) {
+            String voteType = (String) row[0];
+            Long count = (Long) row[1];
+
+            if (voteType.equals("LIKE")) {
+                likes = count;
+            }
+
+            if (voteType.equals("DISLIKE")) {
+                dislikes = count;
+            }
+        }
+
+        return new CommentStatsResponse(commentId, likes, dislikes);
+    }
+
+    @Override
+    public List<CommentResponseDto> getCommentsBy(CommentsSortType sort, String direction, Integer from, Integer size) {
+
+        Pageable pageable = PageRequest.of(from, size);
+
+        List<Comment> comments;
+
+        if (direction.equals("ASC")) {
+            comments = commentRepository.getCommentsByAsc(String.valueOf(sort), pageable).getContent();
+        } else {
+            comments = commentRepository.getCommentsByDesc(String.valueOf(sort), pageable).getContent();
+        }
+
+        return comments.stream()
+                .map(commentMapper::toCommentResponseDto)
+                .toList();
     }
 }
