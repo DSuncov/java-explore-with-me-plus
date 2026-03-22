@@ -23,23 +23,23 @@ public class ReactionController {
 
     private final CommentService commentService;
 
-    @PostMapping("/{commentId}/users/{userId}/vote")
+
+    @PostMapping("/{commentId}/users/{evaluatorId}/vote")
     public ResponseEntity<ReactionResponseDto> addVote(
-            @NotNull @Positive @PathVariable("commentatorId") Long evaluatorId,
-            @NotNull @Positive @PathVariable("commentId") Long commentId,
-            @NotBlank @RequestParam("voteType") String voteType) {
+            @NotNull @Positive @PathVariable Long commentId,
+            @NotNull @Positive @PathVariable Long evaluatorId,
+            @NotBlank @RequestParam String voteType) {
         ReactionResponseDto reactionResponseDto = commentService.addVote(evaluatorId, commentId, voteType);
         return ResponseEntity.ok(reactionResponseDto);
     }
 
     @GetMapping("/{commentId}/stats")
     public ResponseEntity<CommentStatsResponse> getReactionStatsByComment(
-            @NotNull @Positive @PathVariable("commentId") Long commentId) {
+            @NotNull @Positive @PathVariable Long commentId) {
         CommentStatsResponse commentStatsResponse = commentService.getReactionStatsByComment(commentId);
         return ResponseEntity.ok(commentStatsResponse);
     }
 
-    // Пример эндпоинта: /comments/rating?sort=LIKE&direction=DESC&from=10&size=30
     @GetMapping("/rating")
     public ResponseEntity<List<CommentResponseDto>> getRatingBy(
             @RequestParam(required = false) CommentsSortType sort,

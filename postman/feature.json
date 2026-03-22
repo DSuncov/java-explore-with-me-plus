@@ -111,9 +111,9 @@
               }
             },
             "url": {
-              "raw": "{{baseUrl}}}/events/:eventId/users/:userId/comment",
+              "raw": "{{baseUrl}}/events/:eventId/users/:userId/comment",
               "host": [
-                "{{baseUrl}}}"
+                "{{baseUrl}}"
               ],
               "path": [
                 "events",
@@ -244,9 +244,9 @@
               }
             },
             "url": {
-              "raw": "{{baseUrl}}}/events/:eventId/users/:userId/comment/:commentId",
+              "raw": "{{baseUrl}}/events/:eventId/users/:userId/comment/:commentId",
               "host": [
-                "{{baseUrl}}}"
+                "{{baseUrl}}"
               ],
               "path": [
                 "events",
@@ -342,9 +342,9 @@
             "method": "DELETE",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}}/events/:eventId/users/:userId/comment/:commentId",
+              "raw": "{{baseUrl}}/events/:eventId/users/:userId/comment/:commentId",
               "host": [
-                "{{baseUrl}}}"
+                "{{baseUrl}}"
               ],
               "path": [
                 "events",
@@ -512,9 +512,9 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}}/events/:eventId/comments?sort={{sort}}&from={{from}}&size={{size}}",
+              "raw": "{{baseUrl}}/events/:eventId/comments?sort={{sort}}&from={{from}}&size={{size}}",
               "host": [
-                "{{baseUrl}}}"
+                "{{baseUrl}}"
               ],
               "path": [
                 "events",
