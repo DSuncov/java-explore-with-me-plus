@@ -20,6 +20,7 @@ import ru.practicum.event.entity.Event;
 import ru.practicum.event.repository.EventRepository;
 import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.NotFoundException;
+import ru.practicum.exception.ValidationException;
 import ru.practicum.user.entity.User;
 import ru.practicum.user.repository.UserRepository;
 
@@ -166,26 +167,38 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
+    @Transactional
     public ReactionResponseDto addVote(Long evaluatorId, Long commentId, String voteType) {
+        log.info("Добавление реакции: evaluatorId={}, commentId={}, voteType={}",
+                evaluatorId, commentId, voteType);
+
+        // Проверка валидности voteType
+        if (voteType == null || (!voteType.equals("LIKE") && !voteType.equals("DISLIKE"))) {
+            throw new ValidationException("voteType должен быть LIKE или DISLIKE, получен: " + voteType);
+        }
+
         User evaluator = userRepository.findById(evaluatorId).orElseThrow(() -> {
-            log.warn("Пользователь с id={} не найден при добавлении реакции к комментарию", evaluatorId);
+            log.warn("Пользователь с id={} не найден при добавлении реакции", evaluatorId);
             return new NotFoundException("Пользователь с id = " + evaluatorId + " не найден");
         });
 
         Comment comment = commentRepository.findById(commentId).orElseThrow(() -> {
-            log.warn("Комментарий с id={} не найден при добавлении реакции к комментарию", commentId);
-            return new NotFoundException("комментария с id = " + commentId + " не существует");
+            log.warn("Комментарий с id={} не найден при добавлении реакции", commentId);
+            return new NotFoundException("Комментарий с id = " + commentId + " не найден");
         });
 
         Optional<Reaction> reactionOpt = reactionRepository.existByUserAndComment(evaluatorId, commentId);
 
         if (reactionOpt.isPresent()) {
-            // Пользователь уже оставлял реакцию для комментария, поэтому обновляем, если реакция другая
             Reaction reaction = reactionOpt.get();
             if (!reaction.getVoteType().equals(voteType)) {
                 reaction.setVoteType(voteType);
-                return reactionMapper.toReactionResponseDto(reactionRepository.save(reaction));
+                Reaction savedReaction = reactionRepository.save(reaction);
+                log.info("Реакция обновлена: id={}, voteType={}", savedReaction.getId(), voteType);
+                return reactionMapper.toReactionResponseDto(savedReaction);
             }
+            // Если тип реакции не изменился, возвращаем существующую
+            return reactionMapper.toReactionResponseDto(reaction);
         }
 
         Reaction reactionForSave = Reaction.builder()
@@ -195,6 +208,7 @@ public class CommentServiceImpl implements CommentService {
                 .build();
 
         Reaction createdReaction = reactionRepository.save(reactionForSave);
+        log.info("Реакция создана: id={}, voteType={}", createdReaction.getId(), voteType);
         return reactionMapper.toReactionResponseDto(createdReaction);
     }
 
