@@ -12,6 +12,7 @@ import ru.practicum.comment.dto.*;
 import ru.practicum.comment.entity.Comment;
 import ru.practicum.comment.entity.Reaction;
 import ru.practicum.comment.enums.CommentsSortType;
+import ru.practicum.comment.enums.DirectionSortType;
 import ru.practicum.comment.mapper.CommentMapper;
 import ru.practicum.comment.mapper.ReactionMapper;
 import ru.practicum.comment.repository.CommentRepository;
@@ -20,7 +21,6 @@ import ru.practicum.event.entity.Event;
 import ru.practicum.event.repository.EventRepository;
 import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.NotFoundException;
-import ru.practicum.exception.ValidationException;
 import ru.practicum.user.entity.User;
 import ru.practicum.user.repository.UserRepository;
 
@@ -172,11 +172,6 @@ public class CommentServiceImpl implements CommentService {
         log.info("Добавление реакции: evaluatorId={}, commentId={}, voteType={}",
                 evaluatorId, commentId, voteType);
 
-        // Проверка валидности voteType
-        if (voteType == null || (!voteType.equals("LIKE") && !voteType.equals("DISLIKE"))) {
-            throw new ValidationException("voteType должен быть LIKE или DISLIKE, получен: " + voteType);
-        }
-
         User evaluator = userRepository.findById(evaluatorId).orElseThrow(() -> {
             log.warn("Пользователь с id={} не найден при добавлении реакции", evaluatorId);
             return new NotFoundException("Пользователь с id = " + evaluatorId + " не найден");
@@ -197,7 +192,6 @@ public class CommentServiceImpl implements CommentService {
                 log.info("Реакция обновлена: id={}, voteType={}", savedReaction.getId(), voteType);
                 return reactionMapper.toReactionResponseDto(savedReaction);
             }
-            // Если тип реакции не изменился, возвращаем существующую
             return reactionMapper.toReactionResponseDto(reaction);
         }
 
@@ -213,6 +207,7 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public CommentStatsResponse getReactionStatsByComment(Long commentId) {
         if (!commentRepository.existsById(commentId)) {
             log.warn("Комментарий с id={} не найден при получении статистики", commentId);
@@ -228,11 +223,11 @@ public class CommentServiceImpl implements CommentService {
             String voteType = (String) row[0];
             Long count = (Long) row[1];
 
-            if (voteType.equals("LIKE")) {
+            if (voteType.equals(String.valueOf(CommentsSortType.LIKE))) {
                 likes = count;
             }
 
-            if (voteType.equals("DISLIKE")) {
+            if (voteType.equals(String.valueOf(CommentsSortType.DISLIKE))) {
                 dislikes = count;
             }
         }
@@ -241,13 +236,14 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<CommentResponseDto> getCommentsBy(CommentsSortType sort, String direction, Integer from, Integer size) {
 
         Pageable pageable = PageRequest.of(from, size);
 
         List<Comment> comments;
 
-        if (direction.equals("ASC")) {
+        if (direction.equals(String.valueOf(DirectionSortType.ASC))) {
             comments = commentRepository.getCommentsByAsc(String.valueOf(sort), pageable).getContent();
         } else {
             comments = commentRepository.getCommentsByDesc(String.valueOf(sort), pageable).getContent();

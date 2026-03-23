@@ -2,6 +2,7 @@ package ru.practicum.comment.controller;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -28,7 +29,7 @@ public class ReactionController {
     public ResponseEntity<ReactionResponseDto> addVote(
             @NotNull @Positive @PathVariable Long commentId,
             @NotNull @Positive @PathVariable Long evaluatorId,
-            @NotBlank @RequestParam String voteType) {
+            @NotBlank @Pattern (regexp = "^(LIKE|DISLIKE)$") @RequestParam String voteType) {
         ReactionResponseDto reactionResponseDto = commentService.addVote(evaluatorId, commentId, voteType);
         return ResponseEntity.ok(reactionResponseDto);
     }
@@ -42,7 +43,7 @@ public class ReactionController {
 
     @GetMapping("/rating")
     public ResponseEntity<List<CommentResponseDto>> getRatingBy(
-            @RequestParam(required = false) CommentsSortType sort,
+            @RequestParam(required = false, defaultValue = "LIKE") CommentsSortType sort,
             @RequestParam(required = false, defaultValue = "ASC") String direction,
             @RequestParam(required = false, defaultValue = "0") Integer from,
             @RequestParam(required = false, defaultValue = "10") Integer size) {

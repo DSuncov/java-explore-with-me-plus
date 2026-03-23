@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class CommentResponseDto { //возвращаем это дто когда пользователь запросил все комментарии кого-либо эвента
+public class CommentResponseDto {
 
     Long commentatorId;
     LocalDateTime created;
